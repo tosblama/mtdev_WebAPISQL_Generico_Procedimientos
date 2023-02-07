@@ -45,7 +45,6 @@ namespace WebAPISQL_Generico.Clases
         /// Para consultas que vengan desde fuera, usar GetDataTable.
         /// </summary>
         /// <param name="SQL"></param>
-        /// <param name="parametros">Array de string con formato: nombre:valor</param>
         /// <returns>Devuelve un objeto DataTable con los resultados obtenidos tras ejecución de la consulta.</returns>
         public static DataTable GetTmpDataTable(string SQL)
         {
@@ -263,6 +262,30 @@ namespace WebAPISQL_Generico.Clases
             using (SqlConnection con = new SqlConnection(cadenaConexion))
             {
                 SqlCommand cmd = new SqlCommand(SQL, con);
+                await con.OpenAsync();
+                SqlDataReader dr = await cmd.ExecuteReaderAsync();
+                json = DataReaderToJson(dr);
+                dr.Close();
+            }
+            return json;
+        }
+
+        /// <summary>
+        /// Ejecutar una Query de forma segura y devolver los resultados en formato JSON
+        /// </summary>
+        /// <param name="SQL"></param>
+        /// <param name="listaParametros">Formato: nombre:valor|nombre:valor|...</param>
+        /// <returns></returns>
+        public static async Task<string> JsonDataReader(string SQL, string[] listaParametros)
+        {
+            string json = "";
+            using (SqlConnection con = new SqlConnection(cadenaConexion))
+            {
+                SqlCommand cmd = new SqlCommand(SQL, con);
+                for(int i=0; i<listaParametros.Length; i++)
+                {
+                    cmd.Parameters.Add(new SqlParameter(listaParametros[i].Split(':')[0], listaParametros[i].Split(':')[1]));
+                }
                 await con.OpenAsync();
                 SqlDataReader dr = await cmd.ExecuteReaderAsync();
                 json = DataReaderToJson(dr);

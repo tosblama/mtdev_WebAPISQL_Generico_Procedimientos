@@ -23,5 +23,22 @@ namespace WebAPISQL_Generico.Controllers
                 return Ok(resultado);
             }
         }
+
+
+        [HttpPost("executeSP")]
+
+        public async Task<ActionResult> ExecuteSP(string nombre, string parametros)
+        {
+            Clases.GetData gd = new Clases.GetData();
+            string resultado = await gd.ExecuteSP(nombre, parametros);
+            if (resultado == "NotFound")
+            {
+                return NotFound($"El procedimiento {nombre} no se ha encontrado");
+            }
+            else
+            {
+                return Ok(resultado);
+            }
+        }
     }
 }
